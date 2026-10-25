@@ -326,8 +326,11 @@ image-slot.photo-slot::part(ring){display:none}
   .nav{display:none}
   .hdr-r{margin-left:auto}
   .burger{display:grid}
-  .mnav{display:flex;flex-direction:column;position:fixed;top:64px;left:0;right:0;bottom:0;background:var(--navy-950);padding:24px 20px;
-    opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
+  /* position:absolute (bukan fixed): backdrop-filter pada header saat .scrolled
+     menjadikan header containing block untuk elemen fixed, sehingga panel fixed
+     akan terkurung di dalam header dan latarnya hilang. */
+  .mnav{display:flex;flex-direction:column;position:absolute;top:64px;left:0;right:0;height:calc(100vh - 64px);height:calc(100dvh - 64px);
+    background:var(--navy-950);padding:24px 20px;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
   .mnav.open{opacity:1;visibility:visible}
   .mnav a{display:flex;align-items:baseline;gap:16px;padding:18px 0;border-bottom:1px solid var(--line);font-family:var(--display);font-weight:800;font-size:36px;letter-spacing:-.03em;
     opacity:0;transform:translateY(12px);transition:opacity .4s var(--ease),transform .4s var(--ease)}

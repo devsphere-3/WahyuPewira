@@ -103,7 +103,7 @@ function Header({ route }) {
   );
 
   return (
-    <header className={"hdr" + (scrolled ? " scrolled" : "")}>
+    <header className={"hdr" + (scrolled ? " scrolled" : "") + (open ? " menu-open" : "")}>
       <div className="hdr-in">
         <a className="logo" href="/" aria-label={P.person.name}>
           <span className="logo-mark">{P.person.initials}</span>

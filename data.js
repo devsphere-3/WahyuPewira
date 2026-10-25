@@ -150,7 +150,7 @@ window.PORTFOLIO = {
       started: { id: "Agustus 2026", en: "August 2026" },
       type: { id: "Platform registrasi digital", en: "Digital registration platform" },
       tags: ["QRIS", "Payment Gateway", "Webhook", "E-Ticket"],
-      images: ["assets/img/BRAVEMASTER.png", "assets/img/BRAVE1.png"],
+      images: ["assets/img/BRAVEMASTER.webp", "assets/img/BRAVE1.webp"],
       short: {
         id: "Platform registrasi lomba dan event tanpa login: isi data, bayar dengan QRIS, dan e-ticket dikirim ke WhatsApp & email.",
         en: "Registration platform for competitions and events with no login: fill in details, pay via QRIS, and receive an e-ticket by WhatsApp & email.",
@@ -199,7 +199,7 @@ window.PORTFOLIO = {
       started: null,
       type: { id: "Website organisasi", en: "Organisation website" },
       tags: ["Website Organisasi", "Profil", "Responsif"],
-      images: ["assets/img/badangperkasa.png", "assets/img/badangperkasa1.png"],
+      images: ["assets/img/badangperkasa.webp", "assets/img/badangperkasa1.webp"],
       short: {
         id: "Website resmi organisasi Pramuka Badang Perkasa sebagai pusat informasi profil dan kegiatan kepramukaan.",
         en: "The official website of the Pramuka Badang Perkasa scouting organisation — a hub for its profile and activities.",
@@ -242,7 +242,7 @@ window.PORTFOLIO = {
       started: null,
       type: { id: "Website digital hub", en: "Digital hub website" },
       tags: ["Digital Hub", "Profil Usaha", "Vercel"],
-      images: ["assets/img/MiixMaster.png", "assets/img/Miix1.png"],
+      images: ["assets/img/MiixMaster.webp", "assets/img/Miix1.webp"],
       short: {
         id: "Halaman publik “BhipDo • DigitalHub” — profil digital galangan kapal dengan layanan dan proyek aktif.",
         en: "Public page “BhipDo • DigitalHub” — a shipyard's digital profile with services and active projects.",
@@ -285,7 +285,7 @@ window.PORTFOLIO = {
       started: null,
       type: { id: "Dashboard voting", en: "Voting dashboard" },
       tags: ["Dashboard Live", "Voting", "Saweria"],
-      images: ["assets/img/Tanjak%20Emas%201.png"],
+      images: ["assets/img/tanjak%20emas%20Master.webp", "assets/img/Tanjak%20Emas%201.webp"],
       short: {
         id: "“Dashboard Live Vote” — pilih kategori, beri dukungan, dan lihat peringkat pangkalan berdasarkan poin.",
         en: "“Dashboard Live Vote” — pick a category, give support, and see units ranked by points.",
@@ -328,7 +328,7 @@ window.PORTFOLIO = {
       started: null,
       type: { id: "Website (arsip)", en: "Website (archive)" },
       tags: ["Website (arsip)"],
-      images: ["assets/img/LALUSWIM.png", "assets/img/LALUSWIM1.png"],
+      images: ["assets/img/LALUSWIM.webp", "assets/img/LALUSWIM1.webp"],
       short: {
         id: "Proyek website terdahulu. Hosting telah kedaluwarsa — ditampilkan sebagai arsip.",
         en: "An earlier website project. Hosting has expired — shown here as an archive.",
@@ -367,7 +367,7 @@ window.PORTFOLIO = {
       started: null,
       type: { id: "Website event kampus", en: "Campus event website" },
       tags: ["Event Kampus", "Informasi Acara", "Responsif"],
-      images: ["assets/img/BATAMCAMPUSEXPO.png", "assets/img/BATAMCAMPUSXPO1.png"],
+      images: ["assets/img/BATAMCAMPUSEXPO.webp", "assets/img/BATAMCAMPUSXPO1.webp"],
       short: {
         id: "Website informasi Batam Campus Expo — pusat informasi acara bagi pengunjung, peserta, dan calon mitra.",
         en: "Information website for the Batam Campus Expo — a hub of event information for visitors, participants and prospective partners.",

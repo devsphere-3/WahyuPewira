@@ -190,7 +190,7 @@ function Hero() {
             <div className="visual-note" aria-hidden="true">
               {lang === "id" ? "Mengubah ide menjadi pengalaman web yang kuat." : "Turning ideas into powerful web experiences."}
             </div>
-            <image-slot id="profile-photo" shape="rect" fit="contain" src="assets/img/Foto.png" placeholder={t.photoPlaceholder} class="photo-slot"></image-slot>
+            <image-slot id="profile-photo" shape="rect" fit="contain" src="assets/img/Foto.webp" placeholder={t.photoPlaceholder} class="photo-slot"></image-slot>
             <div className="photo-tag">
               <span className="photo-tag-name">{P.person.name}</span>
               <span className="photo-tag-role">{P.person.role[lang]}</span>
@@ -557,8 +557,36 @@ function CapybaraCompanion() {
     }));
 
     const OFF_X = 46, OFF_Y = 30;   // posisi capybara relatif ke kursor
-    let mx = 0, my = 0, x = 0, y = 0, prevX = 0, face = 1, started = false, raf = 0;
+    let mx = 0, my = 0, x = 0, y = 0, prevX = 0, face = 1, started = false, raf = 0, running = false;
     const t0 = performance.now();
+
+    const draw = (cx, cy, tilt) => {
+      host.style.transform = "translate3d(" + cx.toFixed(1) + "px," + cy.toFixed(1) +
+        "px,0) rotate(" + tilt.toFixed(2) + "deg) scaleX(" + face + ")";
+    };
+
+    // Loop hanya jalan saat capybara masih bergerak; begitu diam, RAF
+    // dihentikan supaya halaman tidak terus dirender 60fps.
+    const loop = (now) => {
+      const t = (now - t0) / 1000;
+      const dx = (mx - OFF_X) - x, dy = (my + OFF_Y) - y;
+      x += dx * 0.085;
+      y += dy * 0.085;
+      const vx = x - prevX; prevX = x;
+      if (vx < -0.3) face = -1; else if (vx > 0.3) face = 1;
+      const bob = Math.sin(t * 4.2) * 2.6;                                  // langkah naik-turun
+      const tilt = Math.max(-9, Math.min(9, -vx * 1.4));                    // miring saat bergerak
+      // Ditahan di dalam viewport supaya tidak menghilang di tepi layar.
+      const cx = Math.max(8, Math.min(window.innerWidth - 76, x));
+      const cy = Math.max(8, Math.min(window.innerHeight - 58, y + bob));
+      draw(cx, cy, tilt);
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {                       // sudah tenang
+        draw(cx, Math.max(8, Math.min(window.innerHeight - 58, y)), 0);
+        running = false; raf = 0;
+        return;
+      }
+      raf = requestAnimationFrame(loop);
+    };
 
     const onMove = (e) => {
       mx = e.clientX; my = e.clientY;
@@ -567,27 +595,10 @@ function CapybaraCompanion() {
         started = true; x = mx - OFF_X; y = my + OFF_Y; prevX = x;
         host.classList.add("on");
       }
-    };
-
-    const loop = (now) => {
-      raf = requestAnimationFrame(loop);
-      if (!started) return;
-      const t = (now - t0) / 1000;
-      x += (mx - OFF_X - x) * 0.085;
-      y += (my + OFF_Y - y) * 0.085;
-      const vx = x - prevX; prevX = x;
-      if (vx < -0.3) face = -1; else if (vx > 0.3) face = 1;
-      const bob = Math.sin(t * 4.2) * 2.6;                                  // langkah naik-turun
-      const tilt = Math.max(-9, Math.min(9, -vx * 1.4));                    // miring saat bergerak
-      // Ditahan di dalam viewport supaya tidak menghilang di tepi layar.
-      const cx = Math.max(8, Math.min(window.innerWidth - 76, x));
-      const cy = Math.max(8, Math.min(window.innerHeight - 58, y + bob));
-      host.style.transform = "translate3d(" + cx.toFixed(1) + "px," + cy.toFixed(1) +
-        "px,0) rotate(" + tilt.toFixed(2) + "deg) scaleX(" + face + ")";
+      if (!running) { running = true; raf = requestAnimationFrame(loop); }
     };
 
     window.addEventListener("mousemove", onMove, { passive: true });
-    raf = requestAnimationFrame(loop);
     return () => { cancelAnimationFrame(raf); window.removeEventListener("mousemove", onMove); };
   }, []);
 
@@ -598,41 +609,65 @@ function CapybaraCompanion() {
   );
 }
 
-function CursorSparkles() {
+/* Jejak kilau mengikuti kursor + ledakan kilau saat tombol/tautan ditekan.
+   Satu host dipakai bersama supaya tidak ada dua layer animasi tambahan. */
+function SparkleLayer() {
   const hostRef = useRef(null);
 
   useEffect(() => {
-    if (!hasFinePointer()) return;
     const host = hostRef.current;
     if (!host) return;
+    // Pengguna yang memilih reduced-motion tidak mendapat kilau sama sekali.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const COLORS = ["", "c2", "c3"];
-    let lx = 0, ly = 0;
+    const MAX = 60;                     // batas elemen aktif agar render tetap ringan
+    const fine = hasFinePointer();
 
-    const spawn = (px, py) => {
-      if (host.childElementCount > 20) return;
+    const spawn = (px, py, spread, size, delay) => {
+      if (host.childElementCount >= MAX) return;
+      const a = Math.random() * Math.PI * 2;
+      const d = spread * (0.35 + Math.random() * 0.75);
       const s = document.createElement("i");
       s.className = "spark " + COLORS[(Math.random() * COLORS.length) | 0];
       s.style.cssText =
-        "left:" + px + "px;top:" + py + "px;--s:" + (4 + Math.random() * 5).toFixed(1) + "px;" +
-        "--dx:" + ((Math.random() - 0.5) * 28).toFixed(1) + "px;" +
-        "--dy:" + ((Math.random() - 0.5) * 28).toFixed(1) + "px;" +
-        "--r:" + (Math.random() * 180 - 90).toFixed(0) + "deg";
+        "left:" + px.toFixed(1) + "px;top:" + py.toFixed(1) + "px;--s:" + size + "px;" +
+        "--dx:" + (Math.cos(a) * d).toFixed(1) + "px;" +
+        "--dy:" + (Math.sin(a) * d).toFixed(1) + "px;" +
+        "--r:" + (Math.random() * 180 - 90).toFixed(0) + "deg;" +
+        "--dl:" + delay + "ms";
       host.appendChild(s);
       let alive = true;
       const done = () => { if (!alive) return; alive = false; s.remove(); };
       s.addEventListener("animationend", done, { once: true });
-      setTimeout(done, 1200);   // cadangan bila animationend tidak terpanggil
+      setTimeout(done, 1400);   // cadangan bila animationend tidak terpanggil
     };
 
+    // Jejak kilau: hanya di perangkat berpenunjuk presisi (mouse/trackpad).
+    let lx = 0, ly = 0;
     const onMove = (e) => {
       if (Math.hypot(e.clientX - lx, e.clientY - ly) < 14) return;   // jarak minimum antar kilau
       lx = e.clientX; ly = e.clientY;
-      spawn(e.clientX, e.clientY);
+      spawn(e.clientX, e.clientY, 14, (4 + Math.random() * 5).toFixed(1), 0);
     };
+    if (fine) window.addEventListener("mousemove", onMove, { passive: true });
 
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
+    // Ledakan kilau saat tombol atau tautan ditekan — berlaku juga di layar sentuh.
+    const onPress = (e) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      const el = e.target && e.target.closest ? e.target.closest("a,button,[role=button]") : null;
+      if (!el) return;
+      const n = 8 + ((Math.random() * 4) | 0);
+      for (let i = 0; i < n; i++) {
+        spawn(e.clientX, e.clientY, 46, (5 + Math.random() * 6).toFixed(1), i * 16);
+      }
+    };
+    window.addEventListener("pointerdown", onPress, { passive: true });
+
+    return () => {
+      if (fine) window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("pointerdown", onPress);
+    };
   }, []);
 
   return <div ref={hostRef} className="sparkles" aria-hidden="true" />;
@@ -659,6 +694,18 @@ function App() {
   }, [route.page, route.section, route.slug]);
 
   useRevealAll(route.page + (route.slug || "") + lang);
+
+  // Marquee logo berjalan tanpa henti; hentikan saat keluar layar agar
+  // kompositor tidak terus bekerja di halaman yang tidak dilihat.
+  useEffect(() => {
+    const tracks = document.querySelectorAll(".marquee-track");
+    if (!tracks.length || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      e.target.classList.toggle("paused", !e.isIntersecting);
+    }), { rootMargin: "150px" });
+    tracks.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [route.page, route.slug]);
 
   // Intersep klik tautan internal (href diawali "/") agar dinavigasi tanpa reload.
   useEffect(() => {
@@ -687,7 +734,7 @@ function App() {
       </main>
       <Footer />
       <CapybaraCompanion />
-      <CursorSparkles />
+      <SparkleLayer />
     </AppCtx.Provider>
   );
 }

@@ -59,11 +59,12 @@ main:focus{outline:none}
 .capy canvas{display:block;width:68px;height:auto;image-rendering:pixelated;
   filter:drop-shadow(0 7px 10px var(--capy-shadow))}
 
-/* ---------- cursor sparkle trail ---------- */
-.sparkles{position:fixed;inset:0;z-index:95;pointer-events:none;overflow:hidden}
+/* ---------- cursor sparkle trail + kilau saat tombol ditekan ---------- */
+.sparkles{position:fixed;inset:0;z-index:95;pointer-events:none;overflow:hidden;
+  contain:layout paint style}
 .spark{position:absolute;width:var(--s);height:var(--s);margin-top:calc(var(--s) / -2);margin-left:calc(var(--s) / -2);
   background:var(--accent);clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);
-  animation:sparkfly .72s var(--ease) forwards}
+  animation:sparkfly .72s var(--ease) var(--dl,0s) forwards}
 .spark.c2{background:var(--spark-2)}
 .spark.c3{background:var(--fg)}
 @keyframes sparkfly{
@@ -71,8 +72,12 @@ main:focus{outline:none}
   30%{opacity:1}
   100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0) rotate(calc(var(--r) + 140deg))}
 }
-/* Perangkat sentuh & pengguna yang memilih reduced-motion tidak memakai efek ini. */
-@media (prefers-reduced-motion:reduce),(hover:none),(pointer:coarse){
+/* Capybara tidak dipakai di perangkat sentuh; kilau tetap muncul (mis. saat
+   tombol ditekan) kecuali pengguna memilih reduced-motion. */
+@media (hover:none),(pointer:coarse){
+  .capy{display:none}
+}
+@media (prefers-reduced-motion:reduce){
   .capy,.sparkles{display:none}
 }
 
@@ -187,7 +192,7 @@ image-slot.photo-slot::part(ring){display:none}
   mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
 .marquee-track{display:flex;width:max-content;animation:marquee 34s linear infinite;will-change:transform}
 @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee:hover .marquee-track,.marquee-track.paused{animation-play-state:paused}
 .logo-chip{flex:0 0 auto;display:grid;place-items:center;width:96px;height:56px;margin:0 18px}
 .logo-chip img{height:42px;width:auto;filter:brightness(0) invert(1);opacity:.72;transition:opacity .25s var(--ease),transform .25s var(--ease)}
 .logo-chip:hover img{opacity:1;transform:scale(1.08)}
@@ -338,10 +343,15 @@ image-slot.photo-slot::part(ring){display:none}
   .mnav-n{font-family:var(--mono);font-size:12px;font-weight:400;color:var(--accent);letter-spacing:0}
   .hdr.menu-open{background:var(--navy-950)}
 
-  .hero{padding:104px 0 72px}
+  /* Foto profil turun menempel ke perbatasan hero (slide 1) dan section berikutnya
+     (slide 2): padding bawah hero dihapus agar tepi bawah foto menyentuh garis
+     pemisah, dan aura blur dimatikan karena membuat foto tampak melayang. */
+  .hero{padding:104px 0 0}
   .hero-grid{grid-template-columns:1fr;gap:56px}
-  .hero-visual{width:100%;height:auto;max-width:340px;align-self:center}
-  .photo-frame{width:min(100%,280px);height:auto;margin-left:auto;margin-right:auto;max-width:280px}
+  .hero-visual{width:100%;height:auto;max-width:340px;align-self:center;justify-content:flex-end}
+  .photo-frame{width:min(100%,280px);height:auto;margin-left:auto;margin-right:auto;margin-bottom:0;max-width:280px}
+  .photo-glow{display:none}
+  .photo-slot{filter:drop-shadow(0 16px 24px rgba(3,8,20,.55))}
   .photo-tag{left:auto;right:-12px;bottom:20px;max-width:220px}
   .now{position:relative;top:auto;right:auto;z-index:auto;margin-left:0}
   .hero-visual{order:2}

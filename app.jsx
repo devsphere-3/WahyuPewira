@@ -2,6 +2,27 @@
 const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
 const P = window.PORTFOLIO;
 
+/* ---------- base path situs ----------
+   Satu kode dipakai di dua tempat: Vercel/domain sendiri (situs di root "/")
+   dan GitHub Pages project site (situs di subfolder, mis. "/WahyuPewira/").
+   Segmen pertama URL dianggap bagian dari base hanya kalau bukan nama rute
+   aplikasi, jadi "/projects" tetap dianggap root sedangkan
+   "/WahyuPewira/projects" dikenali sebagai subfolder. */
+const ROUTES = ["about", "projects", "contact", "work"];
+const APP_BASE = (() => {
+  const segs = location.pathname.split("/").filter(Boolean);
+  return segs.length && ROUTES.indexOf(segs[0]) < 0 ? "/" + segs[0] + "/" : "/";
+})();
+/* Path internal ("/projects" atau "assets/img/x.webp") -> URL lengkap dengan
+   base situs, supaya tautan & gambar tidak putus di halaman bersegmen banyak. */
+const H = (to) => APP_BASE + String(to).replace(/^\/+/, "");
+/* Kebalikannya: buang base dari pathname agar navigasi tetap idempoten. */
+function stripBase(pathname) {
+  return APP_BASE !== "/" && pathname.indexOf(APP_BASE) === 0
+    ? "/" + pathname.slice(APP_BASE.length)
+    : pathname;
+}
+
 const AppCtx = createContext(null);
 const useApp = () => useContext(AppCtx);
 
@@ -22,14 +43,16 @@ const IWhatsapp = (p) => <Ico {...p} d={<><path d="M22 16.92v3a2 2 0 0 1-2.18 2 
 
 /* ---------- router (path bersih, tanpa #) ---------- */
 function parsePath() {
-  const parts = location.pathname.replace(/index\.html$/, "").replace(/^\/+|\/+$/g, "").split("/").filter(Boolean);
+  const path = stripBase(location.pathname);
+  const parts = path.replace(/index\.html$/, "").replace(/^\/+|\/+$/g, "").split("/").filter(Boolean);
   if (parts[0] === "work" && parts[1]) return { page: "case", slug: decodeURIComponent(parts[1]) };
   return { page: "home", section: parts[0] || "home" };
 }
 /* Navigasi internal lewat History API, lalu beri tahu router. */
 function navigate(to, replace) {
-  if (to === location.pathname + location.search) return;
-  history[replace ? "replaceState" : "pushState"]({}, "", to);
+  const url = H(stripBase(String(to)));
+  if (url === location.pathname + location.search) return;
+  history[replace ? "replaceState" : "pushState"]({}, "", url);
   window.dispatchEvent(new PopStateEvent("popstate"));
 }
 function useRoute() {
@@ -68,7 +91,7 @@ function Kicker({ n, children }) {
 }
 function Btn({ href, children, variant = "solid", external, onClick }) {
   return (
-    <a className={"btn btn-" + variant} href={href} onClick={onClick}
+    <a className={"btn btn-" + variant} href={external ? href : H(href)} onClick={onClick}
        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
       <span>{children}</span>
       {external ? <IExternal size={16} /> : <IArrowRight size={16} />}
@@ -105,13 +128,13 @@ function Header({ route }) {
   return (
     <header className={"hdr" + (scrolled ? " scrolled" : "") + (open ? " menu-open" : "")}>
       <div className="hdr-in">
-        <a className="logo" href="/" aria-label={P.person.name}>
+        <a className="logo" href={H("/")} aria-label={P.person.name}>
           <span className="logo-mark">{P.person.initials}</span>
           <span className="logo-name">{P.person.shortName}</span>
         </a>
         <nav className="nav" aria-label="Primary">
           {items.map((k) => (
-            <a key={k} href={"/" + k} className={active === k ? "on" : ""}>{t.nav[k]}</a>
+            <a key={k} href={H("/" + k)} className={active === k ? "on" : ""}>{t.nav[k]}</a>
           ))}
         </nav>
         <div className="hdr-r">
@@ -123,7 +146,7 @@ function Header({ route }) {
       </div>
       <div className={"mnav" + (open ? " open" : "")} aria-hidden={!open}>
         {["home", ...items].map((k, i) => (
-          <a key={k} href={k === "home" ? "/" : "/" + k} style={{ transitionDelay: open ? 60 + i * 50 + "ms" : "0ms" }}
+          <a key={k} href={H(k === "home" ? "/" : "/" + k)} style={{ transitionDelay: open ? 60 + i * 50 + "ms" : "0ms" }}
              tabIndex={open ? 0 : -1}>
             <span className="mnav-n">0{i + 1}</span>{t.nav[k]}
           </a>
@@ -180,7 +203,7 @@ function Hero() {
           </div>
         </div>
         <div className="hero-visual ld" style={{ "--d": "200ms" }}>
-          <a className="now" href="/work/bravepay">
+          <a className="now" href={H("/work/bravepay")}>
             <span className="now-l"><span className="pulse" />{t.currentLabel}</span>
             <span className="now-t">{t.currentText}</span>
             <IArrowRight size={16} />
@@ -190,7 +213,7 @@ function Hero() {
             <div className="visual-note" aria-hidden="true">
               {lang === "id" ? "Mengubah ide menjadi pengalaman web yang kuat." : "Turning ideas into powerful web experiences."}
             </div>
-            <image-slot id="profile-photo" shape="rect" fit="contain" src="assets/img/Foto.webp" placeholder={t.photoPlaceholder} class="photo-slot"></image-slot>
+            <image-slot id="profile-photo" shape="rect" fit="contain" src={H("assets/img/Foto.webp")} placeholder={t.photoPlaceholder} class="photo-slot"></image-slot>
             <div className="photo-tag">
               <span className="photo-tag-name">{P.person.name}</span>
               <span className="photo-tag-role">{P.person.role[lang]}</span>
@@ -264,11 +287,11 @@ function StatusBadge({ p }) {
 
 function ProjectCard({ p, idx, big }) {
   const { t, lang } = useApp();
-  const href = "/work/" + p.slug;
+  const href = H("/work/" + p.slug);
   return (
     <article className={"card rv" + (big ? " card-big" : "")} style={{ "--rd": (idx % 2) * 90 + "ms" }}>
       <div className="card-media">
-        <image-slot id={"shot-" + p.slug + "-1"} shape="rect" src={p.images && p.images[0]}
+        <image-slot id={"shot-" + p.slug + "-1"} shape="rect" src={p.images && p.images[0] ? H(p.images[0]) : undefined}
           placeholder={p.name + " — " + t.shotPlaceholder}
           class={"card-slot" + (p.status === "archive" ? " is-archive" : "")}></image-slot>
         <span className="card-idx">{String(idx + 1).padStart(2, "0")}</span>
@@ -419,7 +442,7 @@ function CaseStudy({ slug }) {
       title: S.screens, show: gallery.length > 0, body: (
         <div className={"shots shots-" + (gallery.length + 1)}>
           {gallery.map((src, i) => (
-            <image-slot key={i} id={"shot-" + p.slug + "-" + (i + 2)} shape="rect" src={src}
+            <image-slot key={i} id={"shot-" + p.slug + "-" + (i + 2)} shape="rect" src={H(src)}
               placeholder={t.shotPlaceholder + " " + (i + 2)} class="shot-slot"></image-slot>
           ))}
         </div>
@@ -432,7 +455,7 @@ function CaseStudy({ slug }) {
     <article className="cs" data-screen-label={"Case — " + p.name}>
       <header className="cs-hero">
         <div className="wrap">
-          <a className="back" href="/projects"><IArrowLeft size={16} />{t.back}</a>
+          <a className="back" href={H("/projects")}><IArrowLeft size={16} />{t.back}</a>
           <div className="cs-top ld" style={{ "--d": "0ms" }}>
             <span className="card-type">{t.caseStudy} · {p.type[lang]}</span>
             <StatusBadge p={p} />
@@ -453,7 +476,7 @@ function CaseStudy({ slug }) {
       </header>
 
       <div className="wrap cs-cover ld" style={{ "--d": "240ms" }}>
-        <image-slot id={"shot-" + p.slug + "-1"} shape="rect" src={p.images && p.images[0]} placeholder={p.name + " — " + t.shotPlaceholder + " 1"} class="cs-cover-slot"></image-slot>
+        <image-slot id={"shot-" + p.slug + "-1"} shape="rect" src={p.images && p.images[0] ? H(p.images[0]) : undefined} placeholder={p.name + " — " + t.shotPlaceholder + " 1"} class="cs-cover-slot"></image-slot>
       </div>
 
       <div className="wrap cs-body">
@@ -462,7 +485,7 @@ function CaseStudy({ slug }) {
         ))}
       </div>
 
-      <a className="next" href={"/work/" + next.slug}>
+      <a className="next" href={H("/work/" + next.slug)}>
         <div className="wrap next-in">
           <span className="next-l">{t.next}</span>
           <span className="next-h">{next.name}</span>

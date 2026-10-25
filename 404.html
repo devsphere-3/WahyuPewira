@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Halaman ini dipakai GitHub Pages saat URL seperti /WahyuPewira/projects atau
+     /WahyuPewira/work/bravepay diakses langsung. Path relatif di bawah dihitung
+     dulu terhadap base situs supaya file tetap ketemu dari kedalaman berapa pun. -->
+<script>
+(function () {
+  var ROUTES = ["about", "projects", "contact", "work"];
+  var segs = location.pathname.split("/").filter(Boolean);
+  var base = segs.length && ROUTES.indexOf(segs[0]) < 0 ? "/" + segs[0] + "/" : "/";
+  var b = document.createElement("base");
+  b.href = base;
+  document.head.appendChild(b);
+})();
+</script>
+<title>Wahyu Perwira Sanusi Sihombing — Full-Stack Developer & Digital Product Builder</title>
+<meta name="description" content="Portofolio Wahyu Perwira Sanusi Sihombing — Full-Stack Developer & Digital Product Builder. Aplikasi web dengan Laravel, React, dan Next.js, termasuk BravePay.">
+<meta name="author" content="Wahyu Perwira Sanusi Sihombing">
+<meta name="theme-color" content="#0a1326">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Wahyu Perwira Sanusi Sihombing — Full-Stack Developer & Digital Product Builder">
+<meta property="og:description" content="Portofolio Wahyu Perwira Sanusi Sihombing — aplikasi web dan produk digital praktis.">
+<meta property="og:locale" content="id_ID">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Archivo:wdth,wght@100..125,500..900&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="root"></div>
+
+<script src="image_slot.js"></script>
+<script src="data.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="app.jsx"></script>
+</body>
+</html>
